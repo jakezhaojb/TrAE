@@ -13,22 +13,26 @@ encoder:add(stage1)
 stage2 = nn.ParallelTable()
 for i=1,(#capsule)[1] do
    tmp = nn.Sequential()
-   tmp:add(nn.Linear(regSize, tranSize))
    split = nn.ConcatTable()
    -- for p
-   Isplit1 = torch.zeros(tranSize)
-   Isplit1[1] = 1
-   split:add(nn.Linear(tranSize,1))
-   split:get(1).weight = Isplit1:reshape(tranSize,1)
-   -- for x and y
-   Isplit2 = torch.eye(tranSize)[{{}, {2,tranSize}}]
-   split2 = nn.Sequential()
-   split2:add(nn.Linear(tranSize,tranSize-1))
-   split2:get(1).weight = Isplit2
+   splitProb = nn.Sequential()
+   splitProb:add(nn.Linear(regSize, 1))
+   splitProb:add(nn.Linear(1, genSize))
+   splitProb:get(2).accGradParameters = function() end -- keep fixed
+   splitProb:get(2).weight:fill(1)
+   splitProb:get(2).bias:zero()
+   split:add(splitProb)
+   -- for transform
+   splitTrans = nn.Sequential()
+   splitTrans:add(nn.Linear(regSize, tranSize-1))
+   --TODO Customize the transformation adopted.
+   transformLayer = nn.Add(2)
    delxy = torch.Tensor({delx, dely})
-   split2:add(nn.Add(delxy))
-   split2:add(nn.Linear(tranSize, genSize))
-   split:add(split2)
+   transformLayer.bias:copy(delxy)
+   transformLayer.accGradParameters = function() end -- keep fixed
+   splitTrans:add(transformLayer)
+   splitTrans:add(nn.Linear(tranSize-1, genSize))
+   split:add(splitTrans)
    -- combine
    tmp:add(split)
    tmp:add(nn.CMulTable())
