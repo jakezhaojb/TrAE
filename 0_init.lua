@@ -1,8 +1,10 @@
 require 'nn'
 require 'image'
 require 'gfx.js'
+dofile 'util.lua'
 
-inputSize = 28*28
+inputSize = 32*32
+outputSize = 32*32
 regSize = 40
 tranSize = 3
 genSize = 40
