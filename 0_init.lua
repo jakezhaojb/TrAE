@@ -1,7 +1,10 @@
 require 'nn'
 require 'image'
 require 'gfx.js'
+require 'xlua'
+
 dofile 'util.lua'
+dofile './Modules/init.lua'
 
 inputSize = 32*32
 outputSize = 32*32
@@ -10,5 +13,3 @@ tranSize = 3
 genSize = 40
 -- TODO Tentative
 capsule = torch.Tensor({{40,40}, {40,40}, {40,40}})
-delx = 1
-dely = -1
