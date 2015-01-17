@@ -2,6 +2,7 @@ require 'nn'
 require 'image'
 require 'gfx.js'
 require 'xlua'
+require 'optim'
 
 dofile 'util.lua'
 dofile './Modules/init.lua'

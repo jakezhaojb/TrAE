@@ -12,10 +12,10 @@ loadedImgs = loaded.X:transpose(3,4)
 -- TODO size branches
 -- cmd:()
 -- Now tentative
-sz = 10
-imgs = torch.Tensor(sz,(#loadedImgs)[2],(#loadedImgs)[3],(#loadedImgs)[4])
-idx = torch.randperm((#imgs)[1])[{ {1,sz} }]
-for i = 1,sz do
+trSize = loadedImgs:size(1)
+imgs = torch.Tensor(trSize,(#loadedImgs)[2],(#loadedImgs)[3],(#loadedImgs)[4])
+idx = torch.randperm((#imgs)[1])[{ {1,trSize} }]
+for i = 1,trSize do
    imgs[{ i,{},{},{} }] = loadedImgs:select(1,idx[i]):clone()
 end
 loadedImgs = nil
@@ -74,11 +74,23 @@ yTb = {-2,-1,0,1,2}
          else -- == 0
             yShift = torch.eye((#imgs)[2], (#imgs)[3])
          end
-         shiftImgs[i].TrX = yShift * imgs[i] * xShift
-         shiftImgs[i].X = imgs[i]:clone()
+         shiftImgs[i].TrX = normalize(yShift * imgs[i] * xShift)
+         shiftImgs[i].X = normalize(imgs[i])
       end
       return shiftImgs
    end
 
 print '==> form transformed images'
-TrImgs = getShiftImgs(imgs, xTb, yTb)
+local TrImgs = getShiftImgs(imgs, xTb, yTb)
+
+-- More preparations here
+trData = {}
+for i = 1,#TrImgs do
+   trData[i] = {}
+   trData[i][1] = TrImgs[i].TrX:reshape(inputSize)
+   trData[i][2] = torch.Tensor({ TrImgs[i].delx, TrImgs[i].dely })
+end
+trTgtData = {}
+for i = 1,#TrImgs do
+   trTgtData[i] = TrImgs[i].X:reshape(inputSize)
+end

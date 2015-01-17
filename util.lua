@@ -26,14 +26,20 @@ deepcopy = function(orig)
    return copy
 end
 
-randpermTable = function(x)
+randpermTable = function(x, idx)
    y = {}
    len = table.getn(x)
-   idx = torch.randperm(len)
+   if idx == nil then
+      idx = torch.randperm(len)
+   end
    for i = 1,(#idx)[1] do
       y[i] = deepcopy(x[idx[i]])
    end
-   return y
-   
+   return y, idx
+end
 
+normalize = function(x)
+   normalized_x = x:clone()
+   normalized_x:div(255.0)
+   return normalized_x
 end
