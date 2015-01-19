@@ -55,3 +55,6 @@ encoder:add(nn.Linear(genSize, outputSize))
 -- loss
 criterion = nn.MSECriterion()
 criterion.sizeAverage = false
+
+encoder:cuda()
+criterion:cuda()

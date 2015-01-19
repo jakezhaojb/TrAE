@@ -1,5 +1,5 @@
 -- SGD training
-batchSize = 256
+batchSize = 1024
 
 parameters, gradParameters = encoder:getParameters()
 
@@ -13,7 +13,7 @@ sgdOptimState = {
 
 lbfgsOptimState = {
    learningRate = 1e-3,
-   maxIter = 2,
+   maxIter = 10,
    nCorrelation = 10
 }
 
@@ -49,7 +49,7 @@ function train()
 
          gradParameters:zero()
 
-         local f = 0
+         f = 0
          for i = 1, #inputs do
             local output = encoder:forward(inputs[i])
             local err = criterion:forward(output, targets[i])
@@ -75,13 +75,14 @@ function train()
    time = sys.clock() - time
    time = time / trSize
    print("\n==>time to learn 1 sample = " .. (time * 1000) .. 'ms')
+   print("loss: ".. f) 
 
    -- TODO save the net.
    epoch = epoch + 1
 
 end -- end of train()
 
-for i = 1, 500 do
+for i = 1, 40 do
    train()
 end
 

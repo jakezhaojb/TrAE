@@ -7,7 +7,7 @@ assert(paths.filep(test_file))
 print '==> loading dataset'
 
 loaded = torch.load(train_file, 'ascii')
-loadedImgs = loaded.X:transpose(3,4)
+loadedImgs = loaded.data:transpose(3,4)
 
 -- TODO size branches
 -- cmd:()
@@ -23,18 +23,25 @@ collectgarbage()
 
 -- TODO rgb2gray?
 print '==> Data preprocessing'
-   rgb2grey = function(img)
-      local im = img:clone()
-      im = torch.squeeze(im):type('torch.DoubleTensor')
-      local imGrey = im[{1,{},{}}] * .2126 + im[{2,{},{}}] * .7152 + im[{3,{},{}}] * .0722
-      return imGrey
+if imgs:size(2) == 3 then
+   -- rgb2grey
+      rgb2grey = function(img)
+         local im = img:clone()
+         im = torch.squeeze(im):type('torch.DoubleTensor')
+         local imGrey = im[{1,{},{}}] * .2126 + im[{2,{},{}}] * .7152 + im[{3,{},{}}] * .0722
+         return imGrey
+      end
+   imgsGrey = torch.zeros((#imgs)[1], (#imgs)[3], (#imgs)[4])
+   for i = 1,(#imgs)[1] do
+      imgsGrey[i] = rgb2grey(imgs[{ i,{},{},{} }])
    end
-imgsGrey = torch.zeros((#imgs)[1], (#imgs)[3], (#imgs)[4])
-for i = 1,(#imgs)[1] do
-   imgsGrey[i] = rgb2grey(imgs[{ i,{},{},{} }])
+   imgs = imgsGrey:clone()
+   imgsGrey = nil
+elseif imgs:size(2) == 1 then
+   imgs = torch.squeeze(imgs)
+else
+   sys.exit()
 end
-imgs = imgsGrey:clone()
-imgsGrey = nil
 collectgarbage()
 
 -- Shifting
@@ -87,10 +94,10 @@ local TrImgs = getShiftImgs(imgs, xTb, yTb)
 trData = {}
 for i = 1,#TrImgs do
    trData[i] = {}
-   trData[i][1] = TrImgs[i].TrX:reshape(inputSize)
-   trData[i][2] = torch.Tensor({ TrImgs[i].delx, TrImgs[i].dely })
+   trData[i][1] = (TrImgs[i].TrX:reshape(inputSize)):cuda()
+   trData[i][2] = (torch.Tensor({ TrImgs[i].delx, TrImgs[i].dely })):cuda()
 end
 trTgtData = {}
 for i = 1,#TrImgs do
-   trTgtData[i] = TrImgs[i].X:reshape(inputSize)
+   trTgtData[i] = (TrImgs[i].X:reshape(inputSize)):cuda()
 end

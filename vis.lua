@@ -1,3 +1,4 @@
+require 'gfx.js'
 -- 1. load the saved net
 -- TODO gfx.image() how to save
 
