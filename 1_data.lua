@@ -83,6 +83,8 @@ yTb = {-2,-1,0,1,2}
          end
          shiftImgs[i].TrX = normalize(yShift * imgs[i] * xShift)
          shiftImgs[i].X = normalize(imgs[i])
+         -- pad boundary by mean value
+         --shiftImgs[i].TrX = shiftImgs[i].TrX + shiftImgs[i].TrX:eq(0):type('torch.FloatTensor'):mul(shiftImgs[i].X:mean())
       end
       return shiftImgs
    end

@@ -1,5 +1,5 @@
 -- SGD training
-batchSize = 1024
+batchSize = 256
 
 parameters, gradParameters = encoder:getParameters()
 
@@ -7,17 +7,17 @@ parameters, gradParameters = encoder:getParameters()
 sgdOptimState = {
    learningRate = 1e-3,
    weightDecay = 0,
-   momentum = 0.95,
+   momentum = 0.9,
    learningRateDecay = 1e-7
 }
 
 lbfgsOptimState = {
-   learningRate = 1e-3,
-   maxIter = 10,
+   learningRate = 1e-5,
+   maxIter = 2,
    nCorrelation = 10
 }
 
-function train()
+function train(opt)
    epoch = epoch or 1
    local time = sys.clock()
    -- set training model
@@ -61,12 +61,18 @@ function train()
          
          gradParameters:div(#inputs)
          f = f/#inputs
+         print("loss: ".. f) 
 
          return f, gradParameters
       end -- end of feval
-
-   --optim.sgd(feval, parameters, sgdOptimState) -- SGD doesn't work, way too ill-conditioned
-   optim.lbfgs(feval, parameters, lbfgsOptimState)
+   
+   if opt == 1 then
+      optim.sgd(feval, parameters, sgdOptimState) -- SGD doesn't work, way too ill-conditioned
+   elseif opt == 2 then
+      optim.lbfgs(feval, parameters, lbfgsOptimState)
+   else
+      sys.exit()
+   end
 
    xlua.progress(math.min(t+batchSize, trSize), #shufTrData)
    end -- for loop on each epoch
@@ -81,23 +87,3 @@ function train()
    epoch = epoch + 1
 
 end -- end of train()
-
-for i = 1, 40 do
-   train()
-end
-
--- derive time for model name
-current = os.date()
-pos = current:find(" ") -- remove Sat
-current = string.sub(current, pos)
-name = current:gsub("%s+", "")
-name = 'model.net' .. name
--- save the model
-filename = paths.concat('save', name)
---safeguard
-if paths.filep(filename) then
-   filename = paths.concat(filename, '.1')
-end
-os.execute("mkdir -p " .. sys.dirname(filename))
-print("==> saving model to" .. filename)
-torch.save(filename, encoder)

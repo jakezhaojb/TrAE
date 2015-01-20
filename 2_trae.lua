@@ -4,7 +4,10 @@ local stage1 = nn.ConcatTable()
 -- TODO identical capsule settings?
 for i=1, (#capsule)[1] do
    local split = nn.ParallelTable()
-   split:add(nn.Linear(inputSize, regSize))
+   local splitUp = nn.Sequential()
+   splitUp:add(nn.Linear(inputSize, regSize))
+   splitUp:add(nn.ReLU())
+   split:add(splitUp)
    split:add(nn.Identity())
    stage1:add(split)
 end
@@ -19,10 +22,11 @@ for i=1,(#capsule)[1] do
    -- for p
    local splitProb = nn.Sequential()
    splitProb:add(nn.Linear(regSize, 1))
+   splitProb:add(nn.Sigmoid())
    splitProb:add(nn.Linear(1, genSize))
-   splitProb:get(2).accGradParameters = function() end -- keep fixed
-   splitProb:get(2).weight:fill(1)
-   splitProb:get(2).bias:zero()
+   splitProb:get(3).accGradParameters = function() end -- keep fixed
+   splitProb:get(3).weight:fill(1)
+   splitProb:get(3).bias:zero()
    splitUp:add(splitProb)
    -- for transform
    splitUp:add(nn.Linear(regSize, tranSize-1))
@@ -39,6 +43,7 @@ for i=1,(#capsule)[1] do
    --TODO Customize the transformation adopted.
    postTranDown:add(nn.CAddTable())
    postTranDown:add(nn.Linear(tranSize-1, genSize))
+   postTranDown:add(nn.ReLU())
    postTran:add(postTranDown)
    tmp:add(postTran)
 
@@ -51,6 +56,7 @@ encoder:add(nn.CAddTable())
 
 -- geneLayer to output; TODO to confirm..
 encoder:add(nn.Linear(genSize, outputSize))
+encoder:add(nn.Sigmoid())
 
 -- loss
 criterion = nn.MSECriterion()
