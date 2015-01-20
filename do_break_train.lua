@@ -5,7 +5,7 @@ dofile("1_data.lua")
 dofile("2_trae.lua")
 encoder = nil
 
-filename = 'save/model.net.Jan.19.18_39_03.2015'
+filename = ''
 if paths.filep(filename) == false then
    print('no model file found.')
    sys.exit()
@@ -16,7 +16,7 @@ dofile("3_train.lua")
 assert(type(train) == 'function')
 
 for i = 1, 5 do
-   train(1)
+   train()
 end
 
 -- derive time for model name

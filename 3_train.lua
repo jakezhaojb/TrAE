@@ -8,16 +8,10 @@ sgdOptimState = {
    learningRate = 1e-3,
    weightDecay = 0,
    momentum = 0.9,
-   learningRateDecay = 1e-7
+   learningRateDecay = 1e-4
 }
 
-lbfgsOptimState = {
-   learningRate = 1e-5,
-   maxIter = 2,
-   nCorrelation = 10
-}
-
-function train(opt)
+function train()
    epoch = epoch or 1
    local time = sys.clock()
    -- set training model
@@ -66,13 +60,7 @@ function train(opt)
          return f, gradParameters
       end -- end of feval
    
-   if opt == 1 then
-      optim.sgd(feval, parameters, sgdOptimState) -- SGD doesn't work, way too ill-conditioned
-   elseif opt == 2 then
-      optim.lbfgs(feval, parameters, lbfgsOptimState)
-   else
-      sys.exit()
-   end
+   optim.sgd(feval, parameters, sgdOptimState)
 
    xlua.progress(math.min(t+batchSize, trSize), #shufTrData)
    end -- for loop on each epoch
