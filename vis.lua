@@ -2,7 +2,7 @@
 -- TODO gfx.image() how to save
 dofile('0_init.lua')
 
-filename = './save/model.net.Jan.20.13_45_14.2015'
+filename = './save/model.net.Jan.23.15_45_19.2015'
 
 encoder = torch.load(filename)
 
@@ -32,24 +32,20 @@ end
 
 visualizeOutput = function(enc)
    dofile("1_data.lua")
-   local trDataFrac = {}
-   local outputData = {}
-   for i = 1,10 do 
-      trDataFrac[i] = {}
-      trDataFrac[i][1] = (trData[i][1]):float()
-      trDataFrac[i][2] = (trData[i][2]):float()
-      outputData[i] = enc:forward(trDataFrac[i]):reshape(inputH, inputW)
+   encoder:double()
+   tgtImgs = torch.Tensor():resize(49, inputH, inputW):type('torch.FloatTensor')
+   outImgs = torch.Tensor():resize(49, inputH, inputW):type('torch.FloatTensor')
+   for i = 1,49 do
+      tgtImgs[i] = trTgtData[i]:reshape(inputH, inputW)
+      outImgs[i] = enc:forward(trData[i]):reshape(inputH, inputW)
+      local err = tgtImgs[{i, {}}] - outImgs[{i, {}}]
+      local errNorm = err:norm() / (tgtImgs[{i, {}}]:norm())
+      print("Normalized error: " .. errNorm)
    end
-   inImgs = torch.Tensor():resize(10, inputH, inputW):type('torch.FloatTensor')
-   outImgs = torch.Tensor():resize(10, inputH, inputW):type('torch.FloatTensor')
-   for i = 1,10 do
-      inImgs[i] = trDataFrac[i][1]:resizeAs(inImgs[i])
-      outImgs[i] = outputData[i][1]:resizeAs(outImgs[i])
-   end
-   gfx.image(inImgs, {legend=''})
+   gfx.image(tgtImgs, {legend=''})
    gfx.image(outImgs, {legend=''})
    
-   return inImgs, outImgs
+   return tgtImgs, outImgs
 end
 
 
@@ -58,14 +54,14 @@ visualizeInput = function(num)
    assert(num < 100)
    local tr = torch.Tensor(num, inputH, inputW)
    local tgt = torch.Tensor(num, inputH, inputW)
-   for i=1,3 do
-      local a, b, c, _
+   local a, b, c, _
+   for i=1,3 do -- Test randpermTable
       a, b = randpermTable(trData)
       c, _ = randpermTable(trTgtData, b)
    end
    for i = 1, num do
-      tr[i] = trData[i][1]:reshape(inputH, inputW)
-      tgt[i] = trTgtData[i]:reshape(inputH, inputW)
+      tr[i] = a[i][1]:reshape(inputH, inputW)
+      tgt[i] = c[i]:reshape(inputH, inputW)
    end
    gfx.image(tr, {legend=""})
    gfx.image(tgt, {legend=""})
@@ -75,9 +71,9 @@ end
 
 
 -- TODO visualize all the recognition and generation weights here.
---wtG = visualizeWeight(encoder:get(4))
+--wtG = visualizeWeight(encoder:get(1))
 --wtR = visualizeWeight(encoder:get(1):get(1):get(1):get(1))
 
---_, __ = visualizeOutput(encoder)
+_, __ = visualizeOutput(encoder)
 
-_, __ = visualizeInput(81)
+--_, __ = visualizeInput(81)

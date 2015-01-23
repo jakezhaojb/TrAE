@@ -5,10 +5,10 @@ parameters, gradParameters = encoder:getParameters()
 
 -- SGD doesn't work. Way too ill-conditioned.
 sgdOptimState = {
-   learningRate = 1e-3,
+   learningRate = 1e-1,
    weightDecay = 1e-6,
    momentum = 0.9,
-   learningRateDecay = 1e-4
+   learningRateDecay = 1e-7
 }
 
 function train()
@@ -17,13 +17,28 @@ function train()
    -- set training model
    encoder:training()
 
-   shufTrData, idx = randpermTable(trData) --TODO
+   shufTrData, idx = randpermTable(trData)
    shufTrTgtData, _ = randpermTable(trTgtData, idx)
+
+   if flagDebug then
+      --shufTrData = trData
+      --shufTrTgtData = trTgtData
+
+      --[[shufTrData = torch.Tensor(trSize, inputH*inputW)
+      shufTrTgtData = torch.Tensor(trSize, inputH*inputW)
+      for i = 1, trSize do
+         shufTrData[i] = trData[i][1]:type('torch.FloatTensor'):reshape(1,inputH*inputW)
+         shufTrTgtData[i] = trTgtData[i]:type('torch.FloatTensor'):reshape(1, inputH*inputW)
+      end
+
+      shufTrData = shufTrData:cuda()
+      shufTrTgtData = shufTrTgtData:cuda()--]]
+   end
 
    print('==> training')
    print('epoch #' .. epoch .. '[ batchSize = ' .. batchSize .. ']')
    
-   for t = 1,#shufTrData,batchSize do
+   for t = 1,trSize,batchSize do
       -- create a mini-batch
       local inputs = {}
       local targets = {}
@@ -62,7 +77,7 @@ function train()
    
    optim.sgd(feval, parameters, sgdOptimState)
 
-   xlua.progress(math.min(t+batchSize, trSize), #shufTrData)
+   xlua.progress(math.min(t+batchSize, trSize), trSize)
    end -- for loop on each epoch
 
    -- finish one epoch

@@ -12,9 +12,10 @@ dofile("3_train.lua")
 
 
 -- SGD
-for i = 1, 15 do
+for i = 1, 30 do
    train()
 end
+
 -- derive time for model name
 current = os.date()
 pos = current:find(" ") -- remove Sat

@@ -6,7 +6,7 @@ dofile("1_data.lua")
 dofile("2_trae.lua")
 encoder = nil
 
-filename = './save/model.net.Jan.21.23_38_19.2015'
+filename = './save/1'
 if paths.filep(filename) == false then
    print('no model file found.')
    sys.exit()
@@ -16,7 +16,7 @@ encoder = torch.load(filename):cuda()
 dofile("3_train.lua")
 assert(type(train) == 'function')
 
-for i = 1, 8 do
+for i = 1, 10 do
    train()
 end
 
@@ -36,4 +36,3 @@ end
 os.execute("mkdir -p " .. sys.dirname(filename))
 print("==> saving model to" .. filename)
 torch.save(filename, encoder:float())
-
