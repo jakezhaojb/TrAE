@@ -1,3 +1,5 @@
+assert(flagDebug == false)
+
 encoder = nn.Sequential()
 
 local stage1 = nn.ConcatTable()
@@ -6,7 +8,7 @@ for i=1, (#capsule)[1] do
    local split = nn.ParallelTable()
    local splitUp = nn.Sequential()
    splitUp:add(nn.Linear(inputSize, regSize))
-   splitUp:add(nn.ReLU())
+   splitUp:add(nn.Sigmoid())
    splitUp:add(nn.L1Penalty(1))
    split:add(splitUp)
    split:add(nn.Identity())
@@ -44,7 +46,7 @@ for i=1,(#capsule)[1] do
    --TODO Customize the transformation adopted.
    postTranDown:add(nn.CAddTable())
    postTranDown:add(nn.Linear(tranSize-1, genSize))
-   postTranDown:add(nn.ReLU())
+   postTranDown:add(nn.Sigmoid())
    postTranDown:add(nn.L1Penalty(1))
    postTran:add(postTranDown)
    tmp:add(postTran)

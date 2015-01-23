@@ -6,7 +6,7 @@ parameters, gradParameters = encoder:getParameters()
 -- SGD doesn't work. Way too ill-conditioned.
 sgdOptimState = {
    learningRate = 1e-3,
-   weightDecay = 0,
+   weightDecay = 1e-6,
    momentum = 0.9,
    learningRateDecay = 1e-4
 }
@@ -28,8 +28,8 @@ function train()
       local inputs = {}
       local targets = {}
       for i = t, math.min(t+batchSize-1, trSize) do
-         local input = shufTrData[i]
-         local target = shufTrTgtData[i]
+         local input = deepcopy(shufTrData[i])
+         local target = deepcopy(shufTrTgtData[i])
          table.insert(inputs, input)
          table.insert(targets, target)
       end

@@ -11,7 +11,7 @@ dofile 'util.lua'
 dofile './Modules/init.lua'
 
 
-cutorch.setDevice(1)
+cutorch.setDevice(2)
 torch.setdefaulttensortype('torch.FloatTensor')
 
 inputSize = 32*32
@@ -22,3 +22,10 @@ genSize = 20
 -- TODO Tentative
 --capsule = torch.Tensor({{40,40}, {40,40}, {40,40}, {40,40}, {40,40}, {40,40}, {40,40}, {40,40}})
 capsule = torch.rand(30)
+
+flagDebug = true
+if flagDebug then
+   print("============ Hey man I am in DEBUG mode =============")
+else
+   print("============ Let's get started! ============")
+end

@@ -7,7 +7,8 @@ assert(paths.filep(test_file))
 print '==> loading dataset'
 
 loaded = torch.load(train_file, 'ascii')
-loadedImgs = loaded.data:transpose(3,4)
+--loadedImgs = loaded.data:transpose(3,4)
+loadedImgs = loaded.data:clone()
 
 -- TODO size branches
 -- cmd:()
@@ -96,10 +97,10 @@ local TrImgs = getShiftImgs(imgs, xTb, yTb)
 trData = {}
 for i = 1,#TrImgs do
    trData[i] = {}
-   trData[i][1] = (TrImgs[i].TrX:reshape(inputSize)):cuda()
+   trData[i][1] = (TrImgs[i].X:reshape(inputSize)):cuda()
    trData[i][2] = (torch.Tensor({ TrImgs[i].delx, TrImgs[i].dely })):cuda()
 end
 trTgtData = {}
 for i = 1,#TrImgs do
-   trTgtData[i] = (TrImgs[i].X:reshape(inputSize)):cuda()
+   trTgtData[i] = (TrImgs[i].TrX:reshape(inputSize)):cuda()
 end
